@@ -20,6 +20,18 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(ros2_study_types REQUIRED)
 
+add_executable(server src/server.cpp)
+ament_target_dependencies(server rclcpp ros2_study_types)
+
+add_executable(client src/client.cpp)
+ament_target_dependencies(client rclcpp ros2_study_types)
+
+install(TARGETS
+  server
+  client
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
