@@ -1,7 +1,5 @@
 float64 linear
 float64 angular
 ---
-float64 before_x
-float64 before_y
-float64 after_x
-float64 after_y
+float64 position_x
+float64 position_y
