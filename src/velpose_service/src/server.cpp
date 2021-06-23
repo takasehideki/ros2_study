@@ -1,34 +1,46 @@
-#include "rclcpp/rclcpp.hpp"
-#include "health_msgs/srv/health.hpp"
-
 #include <memory>
+
+#include "rclcpp/rclcpp.hpp"
+#include "velpose_msgs/srv/vel_pose.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 
 class Server : public rclcpp::Node
 {
 public:
   Server()
-  : Node("health_server")
-  {    
-    auto calc_bmi = [this](            
-      const std::shared_ptr<health_msgs::srv::Health::Request> request,
-      std::shared_ptr<health_msgs::srv::Health::Response> response) -> 
-    void {      
+  : Node("vlp_server")
+  {
+    auto vlp_server = [this](
+      const std::shared_ptr<velpose_msgs::srv::VelPose::Request> request,
+      std::shared_ptr<velpose_msgs::srv::VelPose::Response> response)
+    {
       RCLCPP_INFO(this->get_logger(), 
-          "Incoming request.\n height: %u / weight: %.2f", 
-          request->height, request->weight);
+          "Incoming request: linear %.2f / angular %.2f", 
+          request->linear, request->angular);
 
-      response->bmi = request->weight / (request->height / 100.0) / (request->height / 100.0);
-
+      geometry_msgs::msg::Twist vel;
+      vel.linear.x  = request->linear;
+      vel.angular.z = request->angular;
+  
+      response->position_x = odom_position_x_;
+      response->position_y = odom_position_y_;
       RCLCPP_INFO(this->get_logger(), 
-          "sending back response.\n %s's BMI is [%.2f]", 
-          request->name.c_str(), response->bmi);
-    };     
-    service_ = this->create_service<health_msgs::srv::Health>(
-        "health_service",calc_bmi);
-    RCLCPP_INFO(this->get_logger(), "Ready to calculate BMI.");
-  } 
-  private:  
-  rclcpp::Service<health_msgs::srv::Health>::SharedPtr service_;
+          "Position after operating : x %.2f / y %.2f", 
+          response->position_x, response->position_y);
+
+      RCLCPP_INFO(this->get_logger(), "Operation on VelPose server finished");
+    };
+    service_ = this->create_service<velpose_msgs::srv::VelPose>(  
+        "velpose_service", vlp_server);
+
+    RCLCPP_INFO(this->get_logger(), "Ready to run VelPose server");
+  }
+
+private:
+  rclcpp::Service<velpose_msgs::srv::VelPose>::SharedPtr service_;
+
+  float_t odom_position_x_;
+  float_t odom_position_y_;
 };
 
 int main(int argc, char **argv)
