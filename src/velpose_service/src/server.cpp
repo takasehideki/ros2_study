@@ -4,6 +4,9 @@
 #include "velpose_msgs/srv/vel_pose.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
+#include <chrono>
+using namespace std::chrono_literals;
+
 class Server : public rclcpp::Node
 {
 public:
@@ -22,6 +25,14 @@ public:
       vel.linear.x  = request->linear;
       vel.angular.z = request->angular;
   
+      RCLCPP_INFO(this->get_logger(), "Publishing velocity to TB3,,,");
+
+      rclcpp::WallRate loop_rate(100ms);
+      for(int i=0; i<100; i++){
+        publisher_->publish(vel);
+        loop_rate.sleep();
+      }
+
       response->position_x = odom_position_x_;
       response->position_y = odom_position_y_;
       RCLCPP_INFO(this->get_logger(), 
@@ -32,12 +43,14 @@ public:
     };
     service_ = this->create_service<velpose_msgs::srv::VelPose>(  
         "velpose_service", vlp_server);
+    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
     RCLCPP_INFO(this->get_logger(), "Ready to run VelPose server");
   }
 
 private:
   rclcpp::Service<velpose_msgs::srv::VelPose>::SharedPtr service_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
 
   float_t odom_position_x_;
   float_t odom_position_y_;
