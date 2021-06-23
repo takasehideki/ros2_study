@@ -25,6 +25,7 @@ public:
     };     
     service_ = this->create_service<health_msgs::srv::Health>(
         "health_service",calc_bmi);
+    RCLCPP_INFO(this->get_logger(), "Ready to calculate BMI.");
   } 
   private:  
   rclcpp::Service<health_msgs::srv::Health>::SharedPtr service_;
@@ -33,7 +34,6 @@ public:
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Ready to calculate BMI.");
   rclcpp::spin(std::make_shared<Server>());
   rclcpp::shutdown();
   return 0;
