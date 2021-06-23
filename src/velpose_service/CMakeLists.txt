@@ -22,6 +22,18 @@ find_package(velpose_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
+add_executable(server src/server.cpp)
+ament_target_dependencies(server rclcpp velpose_msgs geometry_msgs nav_msgs)
+
+add_executable(client src/client.cpp)
+ament_target_dependencies(client rclcpp velpose_msgs)
+
+install(TARGETS
+  server
+  client
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
